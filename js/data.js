@@ -210,7 +210,7 @@ const Auth = {
 
   logout() {
     localStorage.removeItem("edulearn_user");
-    window.location.href = "index.html";
+    window.location.href = "../index.html";
   },
 
   getUser() {

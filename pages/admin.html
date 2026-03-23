@@ -175,18 +175,8 @@
             <div class="card-header">
               <h3>Top cours</h3>
             </div>
-            <div class="card-body">
-              ${DB.cours.sort((a,b) => b.inscrits - a.inscrits).slice(0,5).map((c,i) => `
-                <div class="top-cours-item">
-                  <div class="rank">${['🥇','🥈','🥉','4','5'][i]}</div>
-                  <div style="font-size:1.4rem">${c.image}</div>
-                  <div style="flex:1;min-width:0">
-                    <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.titre}</div>
-                    <div style="font-size:0.75rem;color:var(--text-muted)">${c.inscrits} inscrits · ⭐${c.note}</div>
-                  </div>
-                  <div style="font-size:0.85rem;font-weight:700;color:var(--gold-dark)">${Utils.formatPrice(c.prix)}</div>
-                </div>
-              `).join('')}
+            <div class="card-body" id="topCoursesContainer">
+              <!-- Top cours générés dynamiquement par JavaScript -->
             </div>
           </div>
         </div>
@@ -268,7 +258,7 @@
         <div class="section-header">
           <div>
             <div class="section-title">Gestion des cours</div>
-            <div class="section-subtitle">${DB.cours.length} cours disponibles</div>
+            <div class="section-subtitle"><span id="coursCount"></span> cours disponibles</div>
           </div>
           <button class="btn btn-primary btn-sm" onclick="openAddCoursModal()">+ Nouveau cours</button>
         </div>
@@ -378,8 +368,16 @@
     const t = titles[viewId] || ['Admin', ''];
     document.getElementById('pageTitle').textContent = t[0];
     document.getElementById('pageSubtitle').textContent = t[1];
-    if (viewId === 'view-utilisateurs') renderUsers(DB.users);
-    if (viewId === 'view-cours') renderCoursAdmin();
+    if (viewId === 'view-dashboard') {
+      renderTopCours();
+    }
+    if (viewId === 'view-utilisateurs') {
+      renderUsers(DB.users);
+    }
+    if (viewId === 'view-cours') {
+      renderCoursAdmin();
+      updateCoursCount();
+    }
   }
 
   // ── Sidebar ──
@@ -542,6 +540,28 @@
     `).join('');
   }
 
+  function updateCoursCount() {
+    const el = document.getElementById('coursCount');
+    if (el) el.textContent = DB.cours.length;
+  }
+
+  function renderTopCours() {
+    const container = document.getElementById('topCoursesContainer');
+    if (!container) return;
+    const topList = [...DB.cours].sort((a, b) => b.inscrits - a.inscrits).slice(0, 5);
+    container.innerHTML = topList.map((c, i) => `
+      <div class="top-cours-item">
+        <div class="rank">${['🥇','🥈','🥉','4','5'][i]}</div>
+        <div style="font-size:1.4rem">${c.image}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.titre}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted)">${c.inscrits} inscrits · ⭐${c.note}</div>
+        </div>
+        <div style="font-size:0.85rem;font-weight:700;color:var(--gold-dark)">${Utils.formatPrice(c.prix)}</div>
+      </div>
+    `).join('');
+  }
+
   // ── Add Cours ──
   function openAddCoursModal() {
     document.getElementById('addCoursModal').classList.add('open');
@@ -570,7 +590,13 @@
     DB.cours.push(newCours);
     closeModal('addCoursModal');
     showToast(`Cours "${titre}" ajouté avec succès !`, 'success');
-    if (currentView === 'view-cours') renderCoursAdmin();
+    if (currentView === 'view-cours') {
+      renderCoursAdmin();
+      updateCoursCount();
+    }
+    if (currentView === 'view-dashboard') {
+      renderTopCours();
+    }
   }
 
   function addUser() {
@@ -592,6 +618,8 @@
 
   // ── Init ──
   renderSidebar();
+  renderTopCours();
+  updateCoursCount();
   setTimeout(initCharts, 100);
 </script>
 </body>
