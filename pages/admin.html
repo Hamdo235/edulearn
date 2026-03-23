@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduLearn — Administration</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    .admin-stat-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-dark);
+      padding: 24px;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .admin-stat-card::after {
+      content: attr(data-emoji);
+      position: absolute;
+      right: 16px; top: 16px;
+      font-size: 2.5rem;
+      opacity: 0.12;
+    }
+    .admin-stat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .admin-stat-card .label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
+    .admin-stat-card .value { font-size: 2.2rem; font-weight: 700; font-family: 'Outfit', sans-serif; color: var(--text-main); }
+    .admin-stat-card .change { font-size: 0.78rem; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+    .admin-stat-card .accent-bar { height: 3px; border-radius: var(--radius-full); margin-top: 16px; }
+
+    .revenue-value {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.8rem;
+      font-weight: 600;
+      color: var(--gold-dark);
+    }
+
+    .user-row-avatar {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .role-badge {
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .role-admin { background: rgba(99,102,241,0.12); color: #4F46E5; }
+    .role-etudiant { background: rgba(16,185,129,0.12); color: #059669; }
+    .role-formateur { background: rgba(245,158,11,0.12); color: #D97706; }
+
+    .action-btn {
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1.5px solid transparent;
+    }
+    .action-edit { background: rgba(99,102,241,0.1); color: #4F46E5; border-color: rgba(99,102,241,0.2); }
+    .action-edit:hover { background: rgba(99,102,241,0.2); }
+    .action-del { background: rgba(239,68,68,0.1); color: var(--danger); border-color: rgba(239,68,68,0.2); }
+    .action-del:hover { background: rgba(239,68,68,0.2); }
+
+    .cours-admin-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--cream-dark);
+      background: var(--white);
+      margin-bottom: 10px;
+      transition: var(--transition);
+    }
+    .cours-admin-item:hover { border-color: var(--gold-light); box-shadow: var(--shadow-sm); }
+    .cours-admin-thumb {
+      width: 50px; height: 50px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; flex-shrink: 0;
+    }
+
+    .top-cours-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--cream);
+    }
+    .top-cours-item:last-child { border-bottom: none; }
+    .rank {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--gold);
+      width: 24px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h4 id="pageTitle">Administration</h4>
+        <p id="pageSubtitle">Vue d'ensemble de la plateforme</p>
+      </div>
+      <div class="topbar-right">
+        <button class="btn btn-primary btn-sm" onclick="openAddCoursModal()">+ Ajouter un cours</button>
+        <div class="btn-icon">🔔<span class="notif-dot"></span></div>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- ── DASHBOARD ADMIN ── -->
+      <div class="page-view active" id="view-dashboard">
+
+        <!-- Stats principales -->
+        <div class="grid-4 mb-24">
+          <div class="admin-stat-card animate-in" data-emoji="🎓">
+            <div class="label">Total Étudiants</div>
+            <div class="value">842</div>
+            <div class="change up">↑ +12% ce mois</div>
+            <div class="accent-bar" style="background:var(--info)"></div>
+          </div>
+          <div class="admin-stat-card animate-in" data-emoji="📚">
+            <div class="label">Cours publiés</div>
+            <div class="value">6</div>
+            <div class="change up">↑ +2 nouveaux</div>
+            <div class="accent-bar" style="background:var(--success)"></div>
+          </div>
+          <div class="admin-stat-card animate-in" data-emoji="👨‍🏫">
+            <div class="label">Formateurs</div>
+            <div class="value">5</div>
+            <div class="change up">↑ +1 ce mois</div>
+            <div class="accent-bar" style="background:var(--warning)"></div>
+          </div>
+          <div class="admin-stat-card animate-in" data-emoji="💰">
+            <div class="label">Revenus totaux</div>
+            <div class="revenue-value">4,58M</div>
+            <div class="change up">↑ +18% FCFA</div>
+            <div class="accent-bar" style="background:var(--gold)"></div>
+          </div>
+        </div>
+
+        <!-- Chart + Top cours -->
+        <div class="grid-2 mb-24">
+          <div class="card">
+            <div class="card-header">
+              <h3>Inscriptions (12 mois)</h3>
+              <span class="badge badge-vert">+23%</span>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <canvas id="inscriptionsChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Top cours</h3>
+            </div>
+            <div class="card-body">
+              ${DB.cours.sort((a,b) => b.inscrits - a.inscrits).slice(0,5).map((c,i) => `
+                <div class="top-cours-item">
+                  <div class="rank">${['🥇','🥈','🥉','4','5'][i]}</div>
+                  <div style="font-size:1.4rem">${c.image}</div>
+                  <div style="flex:1;min-width:0">
+                    <div style="font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.titre}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted)">${c.inscrits} inscrits · ⭐${c.note}</div>
+                  </div>
+                  <div style="font-size:0.85rem;font-weight:700;color:var(--gold-dark)">${Utils.formatPrice(c.prix)}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <!-- Répartition par catégorie -->
+        <div class="grid-2 mb-24">
+          <div class="card">
+            <div class="card-header"><h3>Répartition par catégorie</h3></div>
+            <div class="card-body">
+              <div class="chart-container" style="height:200px">
+                <canvas id="categorieChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Activité récente</h3></div>
+            <div class="card-body">
+              <div class="activity-item">
+                <div class="activity-dot" style="background:var(--success)"></div>
+                <div><div class="activity-text"><strong>Fatima Hassan</strong> a terminé "Développement Web"</div><div class="activity-time">Il y a 1h</div></div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot" style="background:var(--info)"></div>
+                <div><div class="activity-text">Nouveau cours ajouté : <strong>Flutter Mobile</strong></div><div class="activity-time">Il y a 3h</div></div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot" style="background:var(--gold)"></div>
+                <div><div class="activity-text">Paiement reçu : <strong>22 000 FCFA</strong></div><div class="activity-time">Il y a 5h</div></div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot" style="background:var(--warning)"></div>
+                <div><div class="activity-text">Nouvel étudiant inscrit : <strong>Omar Idriss</strong></div><div class="activity-time">Hier</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── UTILISATEURS VIEW ── -->
+      <div class="page-view" id="view-utilisateurs">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Utilisateurs</div>
+            <div class="section-subtitle">Gestion des comptes</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddUserModal()">+ Ajouter</button>
+        </div>
+        <div class="card">
+          <div class="card-body" style="padding:0">
+            <div style="padding:16px 24px;border-bottom:1px solid var(--cream);display:flex;gap:12px">
+              <input class="form-input" style="max-width:280px" placeholder="Rechercher un utilisateur..." oninput="filterUsers(this.value)">
+              <select class="form-select" style="max-width:160px" onchange="filterUsersByRole(this.value)">
+                <option value="">Tous les rôles</option>
+                <option value="admin">Admin</option>
+                <option value="etudiant">Étudiant</option>
+                <option value="formateur">Formateur</option>
+              </select>
+            </div>
+            <div class="table-wrapper">
+              <table id="usersTable">
+                <thead>
+                  <tr>
+                    <th>Utilisateur</th>
+                    <th>Email</th>
+                    <th>Rôle</th>
+                    <th>Inscription</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── COURS VIEW ── -->
+      <div class="page-view" id="view-cours">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Gestion des cours</div>
+            <div class="section-subtitle">${DB.cours.length} cours disponibles</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAddCoursModal()">+ Nouveau cours</button>
+        </div>
+        <div id="coursAdminList"></div>
+      </div>
+
+      <!-- ── PARAMETRES VIEW ── -->
+      <div class="page-view" id="view-parametres">
+        <div class="section-title mb-24">Paramètres de la plateforme</div>
+        <div class="grid-2" style="align-items:start">
+          <div class="card mb-24">
+            <div class="card-header"><h3>Informations générales</h3></div>
+            <div class="card-body">
+              <div class="form-group"><label class="form-label">Nom de la plateforme</label><input class="form-input" value="EduLearn"></div>
+              <div class="form-group"><label class="form-label">Slogan</label><input class="form-input" value="Apprenez à votre propre rythme"></div>
+              <div class="form-group"><label class="form-label">Email de contact</label><input class="form-input" value="contact@edulearn.td"></div>
+              <button class="btn btn-primary" onclick="showToast('Paramètres sauvegardés !','success')">Sauvegarder</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Mon profil Admin</h3></div>
+            <div class="card-body">
+              <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+                <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:700;color:var(--white)">AA</div>
+                <div><div style="font-weight:700">Abakar Admin</div><div class="text-sm text-muted">Administrateur</div></div>
+              </div>
+              <div class="form-group"><label class="form-label">Nom complet</label><input class="form-input" value="Abakar Admin"></div>
+              <div class="form-group"><label class="form-label">Email</label><input class="form-input" value="admin@edulearn.td"></div>
+              <div class="form-group"><label class="form-label">Nouveau mot de passe</label><input class="form-input" type="password" placeholder="••••••••"></div>
+              <button class="btn btn-primary" onclick="showToast('Profil mis à jour !','success')">Mettre à jour</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Ajouter cours -->
+<div class="modal-overlay" id="addCoursModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Ajouter un cours</h3>
+      <button class="modal-close" onclick="closeModal('addCoursModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Titre du cours</label><input class="form-input" id="newTitre" placeholder="Ex: Python Avancé"></div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" id="newDesc" rows="3" placeholder="Description du cours..."></textarea></div>
+      <div class="grid-2" style="gap:12px">
+        <div class="form-group"><label class="form-label">Catégorie</label><select class="form-select" id="newCategorie"><option>Informatique</option><option>Data Science</option><option>Mobile</option><option>Réseaux</option><option>Base de données</option></select></div>
+        <div class="form-group"><label class="form-label">Niveau</label><select class="form-select" id="newNiveau"><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select></div>
+      </div>
+      <div class="grid-2" style="gap:12px">
+        <div class="form-group"><label class="form-label">Prix (FCFA)</label><input class="form-input" id="newPrix" type="number" placeholder="15000"></div>
+        <div class="form-group"><label class="form-label">Durée</label><input class="form-input" id="newDuree" placeholder="Ex: 40h"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Formateur</label><input class="form-input" id="newFormateur" placeholder="Nom du formateur"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="addCours()">Publier le cours</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL Ajouter utilisateur -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Ajouter un utilisateur</h3>
+      <button class="modal-close" onclick="closeModal('addUserModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="grid-2" style="gap:12px">
+        <div class="form-group"><label class="form-label">Prénom</label><input class="form-input" id="newPrenom"></div>
+        <div class="form-group"><label class="form-label">Nom</label><input class="form-input" id="newNom"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="newEmail" type="email"></div>
+      <div class="form-group"><label class="form-label">Rôle</label><select class="form-select" id="newRole"><option value="etudiant">Étudiant</option><option value="formateur">Formateur</option></select></div>
+      <div class="form-group"><label class="form-label">Mot de passe</label><input class="form-input" id="newMdp" type="password"></div>
+      <button class="btn btn-primary" style="width:100%" onclick="addUser()">Créer le compte</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="../js/data.js"></script>
+<script>
+  Auth.requireAuth();
+  const user = Auth.getUser();
+  if (user.role !== 'admin') window.location.href = 'dashboard.html';
+
+  let currentView = 'view-dashboard';
+
+  function goTo(viewId) {
+    document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    currentView = viewId;
+    document.querySelectorAll('.nav-item').forEach(n => {
+      n.classList.toggle('active', n.dataset.view === viewId);
+    });
+    const titles = {
+      'view-dashboard': ['Administration', 'Vue d\'ensemble de la plateforme'],
+      'view-utilisateurs': ['Utilisateurs', 'Gestion des comptes'],
+      'view-cours': ['Cours', 'Gestion des formations'],
+      'view-parametres': ['Paramètres', 'Configuration de la plateforme']
+    };
+    const t = titles[viewId] || ['Admin', ''];
+    document.getElementById('pageTitle').textContent = t[0];
+    document.getElementById('pageSubtitle').textContent = t[1];
+    if (viewId === 'view-utilisateurs') renderUsers(DB.users);
+    if (viewId === 'view-cours') renderCoursAdmin();
+  }
+
+  // ── Sidebar ──
+  function renderSidebar() {
+    const nav = [
+      { view: 'view-dashboard', icon: '📊', label: 'Tableau de bord' },
+      { view: 'view-utilisateurs', icon: '👥', label: 'Utilisateurs', badge: DB.users.length },
+      { view: 'view-cours', icon: '📚', label: 'Cours', badge: DB.cours.length },
+      { view: 'view-parametres', icon: '⚙️', label: 'Paramètres' },
+    ];
+    document.getElementById('sidebar').innerHTML = `
+      <div class="sidebar-logo">
+        <div class="logo-text">Edu<span>Learn</span></div>
+        <div class="logo-sub">Admin Panel</div>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-avatar-sm">AA</div>
+        <div class="sidebar-user-info">
+          <div class="name">Abakar Admin</div>
+          <div class="role" style="color:var(--gold-light)">Administrateur</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Gestion</div>
+        ${nav.map(n => `
+          <div class="nav-item ${n.view === currentView ? 'active' : ''}" data-view="${n.view}" onclick="goTo('${n.view}')">
+            <span class="icon">${n.icon}</span>
+            <span>${n.label}</span>
+            ${n.badge ? `<span class="nav-badge">${n.badge}</span>` : ''}
+          </div>
+        `).join('')}
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="Auth.logout()">
+          <span>🚪</span><span>Déconnexion</span>
+        </button>
+      </div>
+    `;
+  }
+
+  // ── Charts ──
+  function initCharts() {
+    // Inscriptions chart
+    const ctx1 = document.getElementById('inscriptionsChart');
+    if (ctx1) {
+      new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'],
+          datasets: [{
+            label: 'Inscriptions',
+            data: DB.stats.inscriptionsMois,
+            borderColor: '#C9A84C',
+            backgroundColor: 'rgba(201,168,76,0.08)',
+            tension: 0.4,
+            fill: true,
+            pointBackgroundColor: '#C9A84C',
+            pointRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+            y: { grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { font: { size: 11 } } }
+          }
+        }
+      });
+    }
+
+    // Catégorie pie chart
+    const ctx2 = document.getElementById('categorieChart');
+    if (ctx2) {
+      const cats = {};
+      DB.cours.forEach(c => { cats[c.categorie] = (cats[c.categorie] || 0) + c.inscrits; });
+      new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(cats),
+          datasets: [{
+            data: Object.values(cats),
+            backgroundColor: ['#6366f1','#ec4899','#f59e0b','#10b981','#3b82f6','#8b5cf6'],
+            borderWidth: 0,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'right', labels: { font: { size: 11 }, boxWidth: 12 } }
+          },
+          cutout: '65%'
+        }
+      });
+    }
+  }
+
+  // ── Users ──
+  function renderUsers(users) {
+    document.getElementById('usersTbody').innerHTML = users.map(u => `
+      <tr>
+        <td>
+          <div class="flex-gap">
+            <div class="user-row-avatar">${u.avatar}</div>
+            <span class="fw-600">${u.prenom} ${u.nom}</span>
+          </div>
+        </td>
+        <td class="text-muted">${u.email}</td>
+        <td><span class="role-badge role-${u.role}">${u.role}</span></td>
+        <td class="text-muted text-sm">${u.dateInscription}</td>
+        <td>
+          <div class="flex-gap">
+            <button class="action-btn action-edit" onclick="showToast('Modifier : ${u.prenom}','info')">Modifier</button>
+            <button class="action-btn action-del" onclick="deleteUser(${u.id})">Suppr.</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  let usersData = [...DB.users];
+  function filterUsers(q) {
+    const filtered = DB.users.filter(u =>
+      `${u.prenom} ${u.nom} ${u.email}`.toLowerCase().includes(q.toLowerCase())
+    );
+    renderUsers(filtered);
+  }
+  function filterUsersByRole(role) {
+    const filtered = role ? DB.users.filter(u => u.role === role) : DB.users;
+    renderUsers(filtered);
+  }
+  function deleteUser(id) {
+    if (confirm('Supprimer cet utilisateur ?')) {
+      showToast('Utilisateur supprimé (démo)', 'info');
+    }
+  }
+
+  // ── Cours Admin ──
+  function renderCoursAdmin() {
+    document.getElementById('coursAdminList').innerHTML = DB.cours.map(c => `
+      <div class="cours-admin-item">
+        <div class="cours-admin-thumb" style="background:${c.couleur}18">${c.image}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:600;font-size:0.9rem">${c.titre}</div>
+          <div class="text-sm text-muted mt-4">${c.formateur} · ${c.lecons} leçons · ${c.duree}</div>
+          <div class="flex-gap mt-8">
+            <span class="badge ${Utils.getNiveauBadge(c.niveau)}">${c.niveau}</span>
+            <span class="text-sm text-muted">👥 ${c.inscrits} inscrits</span>
+            <span class="text-sm text-muted">⭐ ${c.note}</span>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-weight:700;color:var(--gold-dark)">${Utils.formatPrice(c.prix)}</div>
+          <div class="flex-gap mt-8" style="justify-content:flex-end">
+            <button class="action-btn action-edit" onclick="showToast('Modifier le cours','info')">Modifier</button>
+            <button class="action-btn action-del" onclick="showToast('Cours supprimé (démo)','info')">Suppr.</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Add Cours ──
+  function openAddCoursModal() {
+    document.getElementById('addCoursModal').classList.add('open');
+  }
+  function openAddUserModal() {
+    document.getElementById('addUserModal').classList.add('open');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function addCours() {
+    const titre = document.getElementById('newTitre').value.trim();
+    if (!titre) { showToast('Le titre est requis', 'error'); return; }
+    const newCours = {
+      id: DB.cours.length + 1,
+      titre,
+      description: document.getElementById('newDesc').value,
+      categorie: document.getElementById('newCategorie').value,
+      niveau: document.getElementById('newNiveau').value,
+      prix: parseInt(document.getElementById('newPrix').value) || 10000,
+      duree: document.getElementById('newDuree').value || 'N/A',
+      formateur: document.getElementById('newFormateur').value || 'Formateur',
+      image: '📖', couleur: '#6366f1', lecons: 0, inscrits: 0, note: 0, tags: [], modules: []
+    };
+    DB.cours.push(newCours);
+    closeModal('addCoursModal');
+    showToast(`Cours "${titre}" ajouté avec succès !`, 'success');
+    if (currentView === 'view-cours') renderCoursAdmin();
+  }
+
+  function addUser() {
+    const prenom = document.getElementById('newPrenom').value.trim();
+    const nom = document.getElementById('newNom').value.trim();
+    if (!prenom || !nom) { showToast('Prénom et Nom requis', 'error'); return; }
+    closeModal('addUserModal');
+    showToast(`Utilisateur ${prenom} ${nom} créé !`, 'success');
+    renderUsers(DB.users);
+  }
+
+  // ── Toast ──
+  function showToast(msg, type = 'info') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `show ${type}`;
+    setTimeout(() => t.className = '', 3000);
+  }
+
+  // ── Init ──
+  renderSidebar();
+  setTimeout(initCharts, 100);
+</script>
+</body>
+</html>

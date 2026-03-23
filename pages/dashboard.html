@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduLearn — Mon Espace</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+      border-radius: var(--radius-lg);
+      padding: 32px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .welcome-banner::before {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.08);
+      right: -60px; top: -80px;
+    }
+    .welcome-banner::after {
+      content: '';
+      position: absolute;
+      width: 180px; height: 180px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.06);
+      right: 120px; bottom: -60px;
+    }
+    .welcome-text { position: relative; z-index: 1; }
+    .welcome-text h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+    .welcome-text h2 span { color: var(--gold); }
+    .welcome-text p { color: rgba(255,255,255,0.55); font-size: 0.9rem; }
+    .welcome-cta { position: relative; z-index: 1; }
+
+    .streak-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--cream-dark);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .streak-icon { font-size: 2.5rem; }
+    .streak-num {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--warning);
+      font-family: 'Outfit', sans-serif;
+      line-height: 1;
+    }
+    .streak-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+
+    .my-cours-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--cream-dark);
+      background: var(--white);
+      transition: var(--transition);
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .my-cours-item:hover { border-color: var(--gold-light); box-shadow: var(--shadow-md); }
+    .my-cours-item:last-child { margin-bottom: 0; }
+    .cours-thumb {
+      width: 56px; height: 56px;
+      border-radius: var(--radius-md);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+    .cours-item-info { flex: 1; min-width: 0; }
+    .cours-item-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cours-item-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; }
+    .progress-pct {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--gold-dark);
+      white-space: nowrap;
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--cream);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+    .activity-text { font-size: 0.84rem; color: var(--text-main); }
+    .activity-time { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+    .certif-card {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .certif-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-gold); }
+    .certif-icon { font-size: 2.5rem; }
+    .certif-text h4 { font-size: 1rem; font-weight: 700; }
+    .certif-text p { font-size: 0.8rem; opacity: 0.8; margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h4 id="pageTitle">Tableau de bord</h4>
+        <p id="pageSubtitle">Bienvenue sur votre espace d'apprentissage</p>
+      </div>
+      <div class="topbar-right">
+        <div class="search-bar">
+          <span>🔍</span>
+          <input type="text" placeholder="Rechercher un cours..." id="globalSearch" oninput="handleSearch(this.value)">
+        </div>
+        <div class="btn-icon">
+          🔔
+          <span class="notif-dot"></span>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-content">
+
+      <!-- ── DASHBOARD VIEW ── -->
+      <div class="page-view active" id="view-dashboard">
+        <div class="welcome-banner animate-in">
+          <div class="welcome-text">
+            <h2>Bonjour, <span id="welcomeName">Yakhoub</span> 👋</h2>
+            <p id="welcomeProgress">Vous avez complété 3 cours cette semaine. Continuez comme ça !</p>
+          </div>
+          <div class="welcome-cta">
+            <button class="btn btn-primary" onclick="goTo('view-catalogue')">Voir les cours →</button>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="grid-4 mb-24">
+          <div class="stat-card animate-in">
+            <div class="stat-icon" style="background:rgba(99,102,241,0.1);">📚</div>
+            <div class="stat-info">
+              <div class="label">Cours inscrits</div>
+              <div class="value" id="statInscrits">3</div>
+              <div class="change up">↑ +1 ce mois</div>
+            </div>
+          </div>
+          <div class="stat-card animate-in">
+            <div class="stat-icon" style="background:rgba(16,185,129,0.1);">✅</div>
+            <div class="stat-info">
+              <div class="label">Cours terminés</div>
+              <div class="value" id="statTermines">0</div>
+              <div class="change up">↑ progression</div>
+            </div>
+          </div>
+          <div class="stat-card animate-in">
+            <div class="stat-icon" style="background:rgba(245,158,11,0.1);">⏱️</div>
+            <div class="stat-info">
+              <div class="label">Heures d'étude</div>
+              <div class="value">47</div>
+              <div class="change up">↑ +8h semaine</div>
+            </div>
+          </div>
+          <div class="stat-card animate-in">
+            <div class="stat-icon" style="background:rgba(201,168,76,0.1);">🏆</div>
+            <div class="stat-info">
+              <div class="label">Certificats</div>
+              <div class="value" id="statCertifs">0</div>
+              <div class="change up">En cours...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Streak + Certif -->
+        <div class="grid-2 mb-24">
+          <div class="streak-card">
+            <div class="streak-icon">🔥</div>
+            <div>
+              <div class="streak-num">7</div>
+              <div class="streak-label">Jours consécutifs d'apprentissage</div>
+            </div>
+          </div>
+          <div class="certif-card" onclick="goTo('view-profil')">
+            <div class="certif-icon">🎓</div>
+            <div class="certif-text">
+              <h4>Mes Certificats</h4>
+              <p>Terminez un cours pour obtenir votre certificat</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mes cours en cours + Activité récente -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header">
+              <h3>Mes cours en cours</h3>
+              <button class="btn btn-secondary btn-sm" onclick="goTo('view-mes-cours')">Voir tout</button>
+            </div>
+            <div class="card-body" id="mesCoursList"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Activité récente</h3>
+            </div>
+            <div class="card-body">
+              <div class="activity-item">
+                <div class="activity-dot" style="background:var(--info)"></div>
+                <div>
+                  <div class="activity-text">Leçon 8 : <strong>JavaScript ES6 modules</strong> complétée</div>
+                  <div class="activity-time">Il y a 2 heures</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot" style="background:var(--success)"></div>
+                <div>
+                  <div class="activity-text">Quiz <strong>Python Pandas</strong> réussi (88%)</div>
+                  <div class="activity-time">Hier, 18h45</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot" style="background:var(--gold)"></div>
+                <div>
+                  <div class="activity-text">Inscription au cours <strong>Réseaux & Sécurité</strong></div>
+                  <div class="activity-time">Il y a 3 jours</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot" style="background:var(--warning)"></div>
+                <div>
+                  <div class="activity-text">7 jours de streak atteints 🔥</div>
+                  <div class="activity-time">Il y a 4 jours</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot" style="background:var(--info)"></div>
+                <div>
+                  <div class="activity-text">Leçon 1 complétée : <strong>Introduction au Web</strong></div>
+                  <div class="activity-time">Il y a 5 jours</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MES COURS VIEW ── -->
+      <div class="page-view" id="view-mes-cours">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Mes cours</div>
+            <div class="section-subtitle">Suivez votre progression</div>
+          </div>
+        </div>
+        <div id="mesCoursGrid"></div>
+      </div>
+
+      <!-- ── CATALOGUE VIEW ── -->
+      <div class="page-view" id="view-catalogue">
+        <div class="section-header">
+          <div>
+            <div class="section-title">Catalogue des cours</div>
+            <div class="section-subtitle">Découvrez toutes nos formations disponibles</div>
+          </div>
+          <div class="tabs" id="catalogueTabs">
+            <button class="tab-btn active" onclick="filterCatalogue('Tous', this)">Tous</button>
+            <button class="tab-btn" onclick="filterCatalogue('Informatique', this)">Informatique</button>
+            <button class="tab-btn" onclick="filterCatalogue('Data Science', this)">Data Science</button>
+            <button class="tab-btn" onclick="filterCatalogue('Mobile', this)">Mobile</button>
+          </div>
+        </div>
+        <div class="cours-grid" id="catalogueGrid"></div>
+      </div>
+
+      <!-- ── COURS DETAIL VIEW ── -->
+      <div class="page-view" id="view-cours-detail">
+        <div id="coursDetailContent"></div>
+      </div>
+
+      <!-- ── PROFIL VIEW ── -->
+      <div class="page-view" id="view-profil">
+        <div id="profilContent"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- COURS MODAL -->
+<div class="modal-overlay" id="coursModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Détail du cours</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="../js/data.js"></script>
+<script>
+  // ── Auth Guard ──
+  Auth.requireAuth();
+  const user = Auth.getUser();
+  if (user.role === 'admin') window.location.href = 'admin.html';
+
+  // ── Current view ──
+  let currentView = 'view-dashboard';
+
+  function goTo(viewId) {
+    document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    currentView = viewId;
+    document.querySelectorAll('.nav-item').forEach(n => {
+      n.classList.toggle('active', n.dataset.view === viewId);
+    });
+    const titles = {
+      'view-dashboard': ['Tableau de bord', 'Bienvenue sur votre espace'],
+      'view-mes-cours': ['Mes cours', 'Suivez votre progression'],
+      'view-catalogue': ['Catalogue', 'Découvrez nos formations'],
+      'view-profil': ['Mon profil', 'Gérez vos informations']
+    };
+    const t = titles[viewId] || ['EduLearn', ''];
+    document.getElementById('pageTitle').textContent = t[0];
+    document.getElementById('pageSubtitle').textContent = t[1];
+    if (viewId === 'view-profil') renderProfil();
+  }
+
+  // ── Sidebar ──
+  function renderSidebar() {
+    const nav = [
+      { view: 'view-dashboard', icon: '🏠', label: 'Tableau de bord' },
+      { view: 'view-mes-cours', icon: '📚', label: 'Mes cours', badge: user.coursInscrits?.length || 0 },
+      { view: 'view-catalogue', icon: '🛒', label: 'Catalogue' },
+      { view: 'view-profil', icon: '👤', label: 'Mon profil' },
+    ];
+    document.getElementById('sidebar').innerHTML = `
+      <div class="sidebar-logo">
+        <div class="logo-text">Edu<span>Learn</span></div>
+        <div class="logo-sub">Plateforme E-Learning</div>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-avatar-sm">${user.avatar}</div>
+        <div class="sidebar-user-info">
+          <div class="name">${user.prenom} ${user.nom}</div>
+          <div class="role">${user.role}</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+        ${nav.map(n => `
+          <div class="nav-item ${n.view === currentView ? 'active' : ''}" data-view="${n.view}" onclick="goTo('${n.view}')">
+            <span class="icon">${n.icon}</span>
+            <span>${n.label}</span>
+            ${n.badge ? `<span class="nav-badge">${n.badge}</span>` : ''}
+          </div>
+        `).join('')}
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn-logout" onclick="Auth.logout()">
+          <span>🚪</span><span>Déconnexion</span>
+        </button>
+      </div>
+    `;
+  }
+
+  // ── Dashboard ──
+  function renderDashboard() {
+    document.getElementById('welcomeName').textContent = user.prenom;
+    const inscrits = user.coursInscrits || [];
+    document.getElementById('statInscrits').textContent = inscrits.length;
+    const prog = user.progression || {};
+    const termines = Object.values(prog).filter(p => p >= 100).length;
+    document.getElementById('statTermines').textContent = termines;
+    document.getElementById('statCertifs').textContent = termines;
+
+    // Mes cours en cours
+    const list = document.getElementById('mesCoursList');
+    if (!inscrits.length) {
+      list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>Aucun cours</h3><p>Inscrivez-vous à un cours dans le catalogue</p></div>`;
+      return;
+    }
+    list.innerHTML = inscrits.map(id => {
+      const c = Utils.getCoursById(id);
+      const p = prog[id] || 0;
+      return `
+        <div class="my-cours-item" onclick="openCoursDetail(${id})">
+          <div class="cours-thumb" style="background:${c.couleur}20">${c.image}</div>
+          <div class="cours-item-info">
+            <div class="cours-item-title">${c.titre}</div>
+            <div class="cours-item-meta">${c.lecons} leçons · ${c.duree}</div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${p}%"></div></div>
+          </div>
+          <div class="progress-pct">${p}%</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ── Mes cours complet ──
+  function renderMesCours() {
+    const inscrits = user.coursInscrits || [];
+    const prog = user.progression || {};
+    const grid = document.getElementById('mesCoursGrid');
+    if (!inscrits.length) {
+      grid.innerHTML = `<div class="empty-state"><div class="icon">📭</div><h3>Aucun cours inscrit</h3><p>Découvrez nos formations dans le catalogue</p><br><button class="btn btn-primary" onclick="goTo('view-catalogue')">Voir le catalogue</button></div>`;
+      return;
+    }
+    grid.innerHTML = `<div class="cours-grid">${inscrits.map(id => {
+      const c = Utils.getCoursById(id);
+      const p = prog[id] || 0;
+      return renderCoursCard(c, p, true);
+    }).join('')}</div>`;
+  }
+
+  // ── Catalogue ──
+  let currentFilter = 'Tous';
+  function renderCatalogue(filter = 'Tous') {
+    currentFilter = filter;
+    const cours = filter === 'Tous' ? DB.cours : DB.cours.filter(c => c.categorie === filter);
+    document.getElementById('catalogueGrid').innerHTML = cours.map(c => renderCoursCard(c)).join('');
+  }
+
+  function filterCatalogue(filter, btn) {
+    document.querySelectorAll('#catalogueTabs .tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCatalogue(filter);
+  }
+
+  function renderCoursCard(c, progression = null, showProgress = false) {
+    const inscrits = user.coursInscrits || [];
+    const isInscrit = inscrits.includes(c.id);
+    const p = progression !== null ? progression : (user.progression?.[c.id] || 0);
+    return `
+      <div class="cours-card" onclick="openCoursDetail(${c.id})">
+        <div class="cours-card-banner" style="background:${c.couleur}18">
+          ${c.image}
+        </div>
+        <div class="cours-card-body">
+          <div class="cours-card-meta">
+            <span class="badge ${Utils.getNiveauBadge(c.niveau)}">${c.niveau}</span>
+            <span class="text-sm text-muted">${c.categorie}</span>
+          </div>
+          <div class="cours-card-title">${c.titre}</div>
+          <div class="cours-card-desc">${c.description}</div>
+          ${showProgress ? `
+            <div style="margin-bottom:14px">
+              <div class="flex-between text-sm"><span class="text-muted">Progression</span><span class="fw-600 text-gold">${p}%</span></div>
+              <div class="progress-bar mt-4"><div class="progress-fill" style="width:${p}%"></div></div>
+            </div>
+          ` : ''}
+          <div class="cours-card-footer">
+            <div class="cours-price">${Utils.formatPrice(c.prix)}</div>
+            <div class="cours-stats">
+              <span>⭐ ${c.note}</span>
+              <span>👥 ${c.inscrits}</span>
+              <span>⏱️ ${c.duree}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Cours Detail ──
+  function openCoursDetail(id) {
+    const c = Utils.getCoursById(id);
+    const inscrits = user.coursInscrits || [];
+    const isInscrit = inscrits.includes(id);
+    const p = user.progression?.[id] || 0;
+
+    document.getElementById('coursDetailContent').innerHTML = `
+      <button class="btn btn-secondary btn-sm mb-16" onclick="goBack()">← Retour</button>
+      <div class="card mb-24">
+        <div style="height:180px;background:${c.couleur}18;border-radius:var(--radius-lg) var(--radius-lg) 0 0;display:flex;align-items:center;justify-content:center;font-size:5rem">${c.image}</div>
+        <div class="card-body">
+          <div class="flex-between mb-16">
+            <div>
+              <span class="badge ${Utils.getNiveauBadge(c.niveau)} mb-8">${c.niveau}</span>
+              <h2 style="font-family:'Cormorant Garamond',serif;font-size:2rem;margin-top:8px">${c.titre}</h2>
+              <p class="text-muted mt-4">Par ${c.formateur}</p>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:2rem;font-weight:700;color:var(--gold-dark)">${Utils.formatPrice(c.prix)}</div>
+              ${isInscrit
+                ? `<button class="btn btn-primary mt-8" onclick="continuerCours(${id})">▶ Continuer</button>`
+                : `<button class="btn btn-primary mt-8" onclick="sInscrire(${id})">S'inscrire</button>`
+              }
+            </div>
+          </div>
+          <div class="grid-4 mb-24" style="gap:12px">
+            <div style="text-align:center;padding:14px;background:var(--cream);border-radius:var(--radius-md)">
+              <div style="font-size:1.4rem;font-weight:700">${c.lecons}</div>
+              <div class="text-sm text-muted">Leçons</div>
+            </div>
+            <div style="text-align:center;padding:14px;background:var(--cream);border-radius:var(--radius-md)">
+              <div style="font-size:1.4rem;font-weight:700">${c.duree}</div>
+              <div class="text-sm text-muted">Durée totale</div>
+            </div>
+            <div style="text-align:center;padding:14px;background:var(--cream);border-radius:var(--radius-md)">
+              <div style="font-size:1.4rem;font-weight:700">⭐ ${c.note}</div>
+              <div class="text-sm text-muted">Note moyenne</div>
+            </div>
+            <div style="text-align:center;padding:14px;background:var(--cream);border-radius:var(--radius-md)">
+              <div style="font-size:1.4rem;font-weight:700">${c.inscrits}</div>
+              <div class="text-sm text-muted">Étudiants</div>
+            </div>
+          </div>
+          ${isInscrit ? `
+            <div class="mb-24">
+              <div class="flex-between mb-8"><span class="fw-600">Ma progression</span><span class="fw-600 text-gold">${p}%</span></div>
+              <div class="progress-bar" style="height:10px"><div class="progress-fill" style="width:${p}%"></div></div>
+            </div>
+          ` : ''}
+          <div class="divider"></div>
+          <h3 class="mb-16" style="font-family:'Outfit',sans-serif;font-size:1rem;font-weight:700">Programme du cours</h3>
+          ${c.modules.map((m, i) => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-radius:var(--radius-md);border:1px solid var(--cream-dark);margin-bottom:8px;background:var(--white)">
+              <div class="flex-gap">
+                <div style="width:28px;height:28px;border-radius:50%;background:${c.couleur}18;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:${c.couleur}">${i+1}</div>
+                <span style="font-size:0.88rem;font-weight:500">${m.titre}</span>
+              </div>
+              <span class="text-sm text-muted">${m.lecons} leçons · ${m.duree}</span>
+            </div>
+          `).join('')}
+          <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:8px">
+            ${c.tags.map(t => `<span class="badge badge-bleu">${t}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+    goTo('view-cours-detail');
+  }
+
+  function goBack() {
+    goTo(currentView === 'view-cours-detail' ? 'view-catalogue' : 'view-dashboard');
+  }
+
+  function sInscrire(id) {
+    if (!user.coursInscrits) user.coursInscrits = [];
+    if (!user.coursInscrits.includes(id)) {
+      user.coursInscrits.push(id);
+      if (!user.progression) user.progression = {};
+      user.progression[id] = 0;
+      localStorage.setItem('edulearn_user', JSON.stringify(user));
+      showToast('Inscription réussie ! Bonne étude 🎉', 'success');
+      openCoursDetail(id);
+    }
+  }
+
+  function continuerCours(id) {
+    if (!user.progression) user.progression = {};
+    const cur = user.progression[id] || 0;
+    user.progression[id] = Math.min(100, cur + 10);
+    localStorage.setItem('edulearn_user', JSON.stringify(user));
+    showToast('Progression mise à jour ! +10% ✅', 'success');
+    openCoursDetail(id);
+  }
+
+  // ── Profil ──
+  function renderProfil() {
+    const inscrits = user.coursInscrits || [];
+    const prog = user.progression || {};
+    document.getElementById('profilContent').innerHTML = `
+      <div class="grid-2" style="align-items:start">
+        <div class="card">
+          <div style="height:120px;background:linear-gradient(135deg,var(--navy),var(--navy-mid));border-radius:var(--radius-lg) var(--radius-lg) 0 0;position:relative">
+            <div style="position:absolute;bottom:-32px;left:32px;width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.5rem;color:var(--white);border:4px solid var(--white)">${user.avatar}</div>
+          </div>
+          <div class="card-body" style="padding-top:44px">
+            <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem">${user.prenom} ${user.nom}</h3>
+            <p class="text-muted text-sm mt-4">${user.email}</p>
+            <span class="badge badge-or mt-8" style="display:inline-flex">${user.role}</span>
+            <div class="divider"></div>
+            <div class="form-group">
+              <label class="form-label">Prénom</label>
+              <input class="form-input" value="${user.prenom}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nom</label>
+              <input class="form-input" value="${user.nom}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <input class="form-input" value="${user.email}">
+            </div>
+            <button class="btn btn-primary" onclick="showToast('Profil mis à jour !','success')">Sauvegarder</button>
+          </div>
+        </div>
+        <div>
+          <div class="card mb-24">
+            <div class="card-header"><h3>Mes statistiques</h3></div>
+            <div class="card-body">
+              <div class="grid-2" style="gap:12px">
+                <div style="text-align:center;padding:16px;background:var(--cream);border-radius:var(--radius-md)">
+                  <div style="font-size:2rem;font-weight:700">${inscrits.length}</div>
+                  <div class="text-sm text-muted">Cours inscrits</div>
+                </div>
+                <div style="text-align:center;padding:16px;background:var(--cream);border-radius:var(--radius-md)">
+                  <div style="font-size:2rem;font-weight:700">47h</div>
+                  <div class="text-sm text-muted">Temps d'étude</div>
+                </div>
+                <div style="text-align:center;padding:16px;background:var(--cream);border-radius:var(--radius-md)">
+                  <div style="font-size:2rem;font-weight:700">🔥7</div>
+                  <div class="text-sm text-muted">Jours de streak</div>
+                </div>
+                <div style="text-align:center;padding:16px;background:var(--cream);border-radius:var(--radius-md)">
+                  <div style="font-size:2rem;font-weight:700">${Object.values(prog).filter(p=>p>=100).length}</div>
+                  <div class="text-sm text-muted">Certif. obtenus</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>Mes progressions</h3></div>
+            <div class="card-body">
+              ${inscrits.length ? inscrits.map(id => {
+                const c = Utils.getCoursById(id);
+                const p = prog[id] || 0;
+                return `
+                  <div class="mb-16">
+                    <div class="flex-between mb-4">
+                      <span class="text-sm fw-600">${c.image} ${c.titre}</span>
+                      <span class="text-sm text-gold fw-600">${p}%</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:${p}%"></div></div>
+                  </div>
+                `;
+              }).join('') : '<p class="text-muted text-sm">Aucun cours inscrit</p>'}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ── Search ──
+  function handleSearch(q) {
+    if (!q) return;
+    const results = DB.cours.filter(c =>
+      c.titre.toLowerCase().includes(q.toLowerCase()) ||
+      c.categorie.toLowerCase().includes(q.toLowerCase())
+    );
+    document.getElementById('catalogueGrid').innerHTML = results.map(c => renderCoursCard(c)).join('');
+    goTo('view-catalogue');
+  }
+
+  // ── Toast ──
+  function showToast(msg, type = 'info') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `show ${type}`;
+    setTimeout(() => t.className = '', 3000);
+  }
+
+  function openModal() { document.getElementById('coursModal').classList.add('open'); }
+  function closeModal() { document.getElementById('coursModal').classList.remove('open'); }
+
+  // ── Init ──
+  renderSidebar();
+  renderDashboard();
+  renderMesCours();
+  renderCatalogue();
+</script>
+</body>
+</html>

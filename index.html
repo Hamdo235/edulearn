@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduLearn — Connexion</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      min-height: 100vh;
+      display: flex;
+      background: var(--ivory);
+      overflow: hidden;
+    }
+
+    /* Left panel */
+    .auth-left {
+      flex: 1;
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-left::before {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.08);
+      top: -80px; right: -80px;
+    }
+    .auth-left::after {
+      content: '';
+      position: absolute;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: rgba(201,168,76,0.06);
+      bottom: 40px; left: -60px;
+    }
+    .auth-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 50px;
+      position: relative;
+      z-index: 1;
+    }
+    .auth-logo span { color: var(--gold); }
+    .auth-hero-text {
+      position: relative;
+      z-index: 1;
+    }
+    .auth-hero-text h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+    .auth-hero-text h1 em {
+      color: var(--gold);
+      font-style: italic;
+    }
+    .auth-hero-text p {
+      font-size: 0.95rem;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.7;
+      max-width: 380px;
+      margin-bottom: 40px;
+    }
+    .auth-features {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      position: relative;
+      z-index: 1;
+    }
+    .auth-feature {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.7);
+    }
+    .auth-feature .feat-icon {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-md);
+      background: rgba(201,168,76,0.15);
+      border: 1px solid rgba(201,168,76,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .auth-stats {
+      display: flex;
+      gap: 40px;
+      margin-top: 50px;
+      position: relative;
+      z-index: 1;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .auth-stat .num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .auth-stat .lbl {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Right panel */
+    .auth-right {
+      width: 480px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 50px;
+      background: var(--white);
+    }
+    .auth-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--cream-dark);
+      margin-bottom: 32px;
+    }
+    .auth-tab {
+      padding: 12px 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: var(--transition);
+    }
+    .auth-tab.active {
+      color: var(--navy);
+      border-bottom-color: var(--gold);
+    }
+    .auth-tab:hover:not(.active) { color: var(--text-main); }
+
+    .auth-form-title {
+      margin-bottom: 28px;
+    }
+    .auth-form-title h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      color: var(--text-main);
+    }
+    .auth-form-title p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .demo-accounts {
+      background: var(--cream);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      margin-bottom: 24px;
+    }
+    .demo-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .demo-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--transition);
+      margin-bottom: 4px;
+    }
+    .demo-item:hover { background: var(--cream-dark); }
+    .demo-item:last-child { margin-bottom: 0; }
+    .demo-role {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+    .demo-email {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    .password-wrapper { position: relative; }
+    .toggle-pw {
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      font-size: 1rem;
+      color: var(--text-muted);
+      user-select: none;
+    }
+    .error-msg {
+      display: none;
+      color: var(--danger);
+      font-size: 0.8rem;
+      margin-top: 8px;
+      padding: 8px 12px;
+      background: rgba(239,68,68,0.08);
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--danger);
+    }
+    .error-msg.show { display: block; }
+
+    .btn-login {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--navy), var(--navy-mid));
+      color: var(--white);
+      border-radius: var(--radius-full);
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: var(--transition);
+      margin-top: 8px;
+    }
+    .btn-login:hover {
+      background: linear-gradient(135deg, var(--navy-mid), var(--navy-light));
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    @media (max-width: 900px) {
+      .auth-left { display: none; }
+      .auth-right { width: 100%; padding: 40px 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Left Panel -->
+  <div class="auth-left">
+    <div class="auth-logo">Edu<span>Learn</span></div>
+    <div class="auth-hero-text">
+      <h1>Apprenez à votre<br><em>propre rythme</em></h1>
+      <p>La plateforme e-learning conçue pour les étudiants tchadiens. Accédez aux meilleurs cours en informatique, data science et développement.</p>
+    </div>
+    <div class="auth-features">
+      <div class="auth-feature">
+        <div class="feat-icon">🎓</div>
+        <span>Cours dispensés par des formateurs certifiés</span>
+      </div>
+      <div class="auth-feature">
+        <div class="feat-icon">📱</div>
+        <span>Accessible sur tous vos appareils</span>
+      </div>
+      <div class="auth-feature">
+        <div class="feat-icon">🏆</div>
+        <span>Certificats reconnus à la fin de chaque formation</span>
+      </div>
+    </div>
+    <div class="auth-stats">
+      <div class="auth-stat">
+        <div class="num">842+</div>
+        <div class="lbl">Étudiants</div>
+      </div>
+      <div class="auth-stat">
+        <div class="num">6</div>
+        <div class="lbl">Cours</div>
+      </div>
+      <div class="auth-stat">
+        <div class="num">5</div>
+        <div class="lbl">Formateurs</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="auth-right">
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchTab('login')">Connexion</div>
+      <div class="auth-tab" onclick="switchTab('register')">Inscription</div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+      <div class="auth-form-title">
+        <h2>Bon retour 👋</h2>
+        <p>Connectez-vous à votre espace d'apprentissage</p>
+      </div>
+
+      <div class="demo-accounts">
+        <div class="demo-title">🔑 Comptes de démonstration</div>
+        <div class="demo-item" onclick="fillDemo('admin@edulearn.td','admin123')">
+          <span class="demo-role">🛡️ Admin</span>
+          <span class="demo-email">admin@edulearn.td / admin123</span>
+        </div>
+        <div class="demo-item" onclick="fillDemo('yakhoub@edulearn.td','1234')">
+          <span class="demo-role">🎓 Étudiant</span>
+          <span class="demo-email">yakhoub@edulearn.td / 1234</span>
+        </div>
+        <div class="demo-item" onclick="fillDemo('formateur@edulearn.td','1234')">
+          <span class="demo-role">👨‍🏫 Formateur</span>
+          <span class="demo-email">formateur@edulearn.td / 1234</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Adresse email</label>
+        <input type="email" id="loginEmail" class="form-input" placeholder="votre@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <div class="password-wrapper">
+          <input type="password" id="loginPassword" class="form-input" placeholder="••••••••" style="padding-right:44px">
+          <span class="toggle-pw" onclick="togglePw('loginPassword', this)">👁️</span>
+        </div>
+      </div>
+      <div id="loginError" class="error-msg">Email ou mot de passe incorrect.</div>
+      <button class="btn-login" onclick="handleLogin()">Se connecter →</button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="registerForm" style="display:none">
+      <div class="auth-form-title">
+        <h2>Créer un compte</h2>
+        <p>Rejoignez des milliers d'étudiants sur EduLearn</p>
+      </div>
+      <div class="grid-2" style="gap:12px">
+        <div class="form-group">
+          <label class="form-label">Prénom</label>
+          <input type="text" class="form-input" placeholder="Yakhoub">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nom</label>
+          <input type="text" class="form-input" placeholder="Mahamat">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Adresse email</label>
+        <input type="email" class="form-input" placeholder="votre@email.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mot de passe</label>
+        <div class="password-wrapper">
+          <input type="password" id="regPassword" class="form-input" placeholder="••••••••" style="padding-right:44px">
+          <span class="toggle-pw" onclick="togglePw('regPassword', this)">👁️</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rôle</label>
+        <select class="form-select">
+          <option>Étudiant</option>
+          <option>Formateur</option>
+        </select>
+      </div>
+      <button class="btn-login" onclick="handleRegister()">Créer mon compte →</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <script src="js/data.js"></script>
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.auth-tab').forEach((t, i) => {
+        t.classList.toggle('active', (tab === 'login' ? 0 : 1) === i);
+      });
+      document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+      document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
+    }
+
+    function fillDemo(email, pw) {
+      document.getElementById('loginEmail').value = email;
+      document.getElementById('loginPassword').value = pw;
+      showToast('Compte rempli ! Cliquez sur Connexion.', 'info');
+    }
+
+    function togglePw(id, el) {
+      const inp = document.getElementById(id);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      el.textContent = inp.type === 'password' ? '👁️' : '🙈';
+    }
+
+    function handleLogin() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pw = document.getElementById('loginPassword').value;
+      const user = Auth.login(email, pw);
+      if (user) {
+        showToast('Connexion réussie ! Redirection...', 'success');
+        setTimeout(() => {
+          window.location.href = user.role === 'admin' ? 'pages/admin.html' : 'pages/dashboard.html';
+        }, 800);
+      } else {
+        document.getElementById('loginError').classList.add('show');
+      }
+    }
+
+    function handleRegister() {
+      showToast('Compte créé avec succès ! (démo)', 'success');
+      setTimeout(() => switchTab('login'), 1200);
+    }
+
+    document.getElementById('loginPassword').addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleLogin();
+    });
+
+    function showToast(msg, type = 'info') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `show ${type}`;
+      setTimeout(() => t.className = '', 3000);
+    }
+
+    // Auto-redirect if already logged in
+    if (Auth.isLoggedIn()) {
+      const u = Auth.getUser();
+      window.location.href = u.role === 'admin' ? 'pages/admin.html' : 'pages/dashboard.html';
+    }
+  </script>
+</body>
+</html>
